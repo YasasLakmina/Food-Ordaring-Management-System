@@ -60,17 +60,6 @@ const restaurantSchema = new mongoose.Schema({
     type: String, // e.g., "10:00 PM"
     required: true,
   },
-  orderStatus: {
-    type: String,
-    enum: [
-      "pending order",
-      "order confirmed",
-      "preparing",
-      "ready",
-      "out for delivery",
-    ],
-    default: "pending order",
-  },
 });
 
 const Restaurant = mongoose.model("Restaurant", restaurantSchema);
