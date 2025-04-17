@@ -45,7 +45,7 @@ const restaurantSchema = new mongoose.Schema({
     required: true,
   },
   deliveryRange: {
-    type: Number, // in kilometers
+    type: Number, 
     required: true,
   },
   openCloseStatus: {
