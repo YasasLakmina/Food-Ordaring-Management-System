@@ -1,42 +1,46 @@
 const mongoose = require("mongoose");
 
-const foodSchema = new mongoose1.Schema({
+// Define the schema for the menu item
+const menuItemSchema = new mongoose.Schema(
+  {
     name: {
-        type: String,
-        required: true,
+      type: String,
+      required: true,
     },
-    description:{
-        type: String,
-        required: true,
+    description: {
+      type: String,
+      required: true,
     },
-    price:{
-        type: Number,
-        required: true,
+    price: {
+      type: Number,
+      required: true,
     },
-    category:{
-        type: String,
-        required: true,
+    category: {
+      type: String,
+      required: true,
     },
-    image:{
-        type: String,
-        required: true,
+    image: {
+      type: String,
+      required: true,
     },
-    rating:{
-        type: Number,
-        default: 0,  // or null
+    rating: {
+      type: Number,
+      default: 0, // or null
     },
-    isAvailable:{
-        type: Boolean,
-        default: true,
+    isAvailable: {
+      type: Boolean,
+      default: true,
     },
+    restaurantId: {
+      type: mongoose.Schema.Types.ObjectId, // Fixed mongoose1 to mongoose
+      ref: "Restaurant", // Reference to the Restaurant model
+      required: true,
+    },
+  },
+  { timestamps: true }
+);
 
-    restaurantId:{
-        type: mongoose1.Schema.Types.ObjectId,
-        ref: "Restaurant",
-        required: true,
-    }
+// Create the model
+const MenuItem = mongoose.model("MenuItem", menuItemSchema);
 
-}, {    timestamps: true });
-
-const Food = mongoose1.model("Food", foodSchema);
-export default Food;
+module.exports = MenuItem; // Export the model using CommonJS

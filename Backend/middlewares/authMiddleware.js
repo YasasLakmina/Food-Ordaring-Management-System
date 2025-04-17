@@ -13,7 +13,7 @@ const authenticate = (req, res, next) => {
       token,
       process.env.JWT_SECRET || "your_jwt_secret"
     ); // Verify token
-    req.user = decoded; // Attach user info to the request object
+    req.restaurant = decoded; // Attach restaurant info to the request object
     next();
   } catch (error) {
     res.status(400).json({ message: "Invalid token." });
