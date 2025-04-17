@@ -102,7 +102,38 @@ const loginRestaurant = async (req, res) => {
   }
 };
 
+// Controller to toggle or update the open/close status
+const updateOpenCloseStatus = async (req, res) => {
+  try {
+    const restaurantId = req.restaurant.id; // Get the logged-in restaurant's ID from the token
+    const { openCloseStatus } = req.body; // Get the new status from the request body
+
+    // Find the restaurant and update the status
+    const updatedRestaurant = await Restaurant.findByIdAndUpdate(
+      restaurantId,
+      { openCloseStatus },
+      { new: true } // Return the updated document
+    );
+
+    if (!updatedRestaurant) {
+      return res.status(404).json({ message: "Restaurant not found" });
+    }
+
+    res.status(200).json({
+      message: "Open/close status updated successfully",
+      restaurant: updatedRestaurant,
+    });
+  } catch (error) {
+    console.error("Error updating open/close status:", error);
+    res.status(500).json({
+      message: "An error occurred while updating the status",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   loginRestaurant,
-  registerRestaurant, // Ensure this is still exported
+  registerRestaurant,
+  updateOpenCloseStatus, // Export the new controller
 };
