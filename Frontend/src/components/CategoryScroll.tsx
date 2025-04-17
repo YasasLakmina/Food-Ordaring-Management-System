@@ -20,6 +20,11 @@ interface Category {
 const categories: Category[] = [
   {
     id: "1",
+    name: "All Category",
+    icon: "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=100&h=100&q=80",
+  },
+  {
+    id: "1",
     name: "Grocery",
     icon: "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=100&h=100&q=80",
   },
