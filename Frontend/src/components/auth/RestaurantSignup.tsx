@@ -150,9 +150,7 @@ const RestaurantSignup: React.FC = () => {
         </div>
       </div>
       <div className="flex space-x-4">
-        <Button type="button" variant="outline" onClick={() => window.history.back()} className="flex-1">
-          Back
-        </Button>
+        
         <Button type="submit" variant="primary" className="flex-1">
           Register Restaurant
         </Button>

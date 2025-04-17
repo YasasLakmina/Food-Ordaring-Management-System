@@ -41,7 +41,7 @@ const LoginForm: React.FC = () => {
           </label>
         </div>
         <div className="text-sm">
-          <a href="#" className="font-medium text-green-600 hover:text-green-500">
+          <a href="#" className="font-medium text-gray-600 hover:text-gray-500">
             Forgot password?
           </a>
         </div>
