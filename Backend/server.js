@@ -1,6 +1,7 @@
-import express from "express";
-import cors from "cors";
-import { connectDB } from "./config/dbConnection.js";
+const express = require("express");
+const cors = require("cors");
+const { connectDB } = require("./config/dbConnection.js");
+const authRoute = require("./routes/authRoute.js");
 
 //app config
 const app = express();
@@ -13,9 +14,8 @@ app.use(express.json());
 //db Connection
 connectDB();
 
-app.get("/", (req, res) => {
-  res.send("API is running...");
-});
+// Routes
+app.use("/api/auth", authRoute); // Use the auth route
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

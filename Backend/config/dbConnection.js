@@ -1,9 +1,9 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
-export const connectDB = async () => {
+const connectDB = async () => {
   await mongoose
     .connect(
-      "mongodb+srv://yasaslakmina:<yasaslakmina>@cluster001.lpmptt6.mongodb.net/food-ordering-app?retryWrites=true&w=majority&appName=Cluster001"
+      "mongodb+srv://yasaslakmina:1234@cluster001.lpmptt6.mongodb.net/food-ordering-app?retryWrites=true&w=majority&appName=Cluster001"
     )
     .then(() => {
       console.log("MongoDB connected successfully");
@@ -12,3 +12,5 @@ export const connectDB = async () => {
       console.error("MongoDB connection error:", error);
     });
 };
+
+module.exports = { connectDB };
