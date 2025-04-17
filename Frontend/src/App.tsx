@@ -1,12 +1,13 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { CartProvider } from './context/CartContext';
-import Layout from './components/Layout/Layout';
-import Home from './pages/Home';
-import RestaurantDetail from './pages/RestaurantDetail';
-import Checkout from './pages/Checkout';
+import React from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { CartProvider } from "./context/CartContext";
+import Layout from "./components/Layout/Layout";
+import Home from "./pages/Home";
+import RestaurantDetail from "./pages/RestaurantDetail";
+import Checkout from "./pages/Checkout";
 export function App() {
-  return <BrowserRouter>
+  return (
+    <BrowserRouter>
       <CartProvider>
         <Layout>
           <Routes>
@@ -16,5 +17,6 @@ export function App() {
           </Routes>
         </Layout>
       </CartProvider>
-    </BrowserRouter>;
+    </BrowserRouter>
+  );
 }
