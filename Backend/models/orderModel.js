@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const orderSchema = new mongoose.Schema(
   {
-    restaurantId: {
+    restaurant: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Restaurant", // Reference to the Restaurant model
       required: true,

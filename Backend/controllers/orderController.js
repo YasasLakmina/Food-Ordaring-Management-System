@@ -4,21 +4,27 @@ const MenuItem = require("../models/menuItem");
 // Controller to get all orders for a restaurant
 const getOrdersByRestaurant = async (req, res) => {
   try {
-    const restaurantId = req.restaurant.id; // Get the logged-in restaurant's ID from the token
+    const restaurantId = req.restaurant._id;
+    const { filter = "all" } = req.query;
 
-    // Fetch all orders for the restaurant
-    const orders = await Order.find({ restaurantId }).populate(
-      "items.menuItemId",
-      "name price"
-    );
+    // Change from 'restaurant' to 'restaurantId' to match your model
+    let query = { restaurantId: restaurantId };
+    if (filter !== "all") {
+      query.status = filter;
+    }
 
-    res.status(200).json({ orders });
+    console.log("Querying orders with:", query); // Add this for debugging
+
+    const orders = await Order.find(query)
+      .populate("items.menuItemId")
+      .sort({ createdAt: -1 });
+
+    console.log(`Found ${orders.length} orders`); // Add this for debugging
+
+    res.json({ orders });
   } catch (error) {
     console.error("Error fetching orders:", error);
-    res.status(500).json({
-      message: "An error occurred while fetching orders",
-      error: error.message,
-    });
+    res.status(500).json({ message: "Error fetching orders" });
   }
 };
 
@@ -51,7 +57,7 @@ const createOrder = async (req, res) => {
 
     // Create the order
     const newOrder = new Order({
-      restaurantId,
+      restaurant: restaurantId, // Change from 'restaurantId' to 'restaurant'
       customerName,
       customerContact,
       items,
