@@ -101,17 +101,36 @@ export const deleteMenuItem = createAsyncThunk(
   }
 );
 
+// Update the fetchOrders thunk to accept a filter parameter
 export const fetchOrders = createAsyncThunk(
   "restaurant/fetchOrders",
-  async () => {
-    return await restaurantService.getRestaurantOrders();
+  async (filter: string = "all") => {
+    return await restaurantService.getRestaurantOrders(filter);
   }
 );
 
+// Modify your updateOrderStatus thunk to include the current filter
 export const updateOrderStatus = createAsyncThunk(
   "restaurant/updateOrderStatus",
-  async ({ id, status }: { id: string; status: string }) => {
-    return await restaurantService.updateOrderStatus(id, status);
+  async (
+    {
+      id,
+      status,
+      currentFilter = "all",
+    }: { id: string; status: string; currentFilter?: string },
+    { dispatch }
+  ) => {
+    const response = await restaurantService.updateOrderStatus(id, status);
+
+    // Don't refetch orders here - we'll handle that in the component
+    return response;
+  }
+);
+
+export const updateRestaurantProfile = createAsyncThunk(
+  "restaurant/updateProfile",
+  async (profileData: any) => {
+    return await restaurantService.updateRestaurantProfile(profileData);
   }
 );
 
@@ -161,6 +180,9 @@ const restaurantSlice = createSlice({
         if (state.profile) {
           state.profile.openCloseStatus = action.payload.openCloseStatus;
         }
+      })
+      .addCase(updateRestaurantProfile.fulfilled, (state, action) => {
+        state.profile = action.payload;
       });
 
     // Menu reducers
