@@ -14,6 +14,10 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
+// Add this before your routes
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
 // Database connection
 connectDB();
 
@@ -28,6 +32,8 @@ app.use("/api/auth", require("./routes/authRoute"));
 app.use("/api/restaurant", require("./routes/restaurantRoute"));
 app.use("/api/order", require("./routes/orderRoute"));
 app.use("/api/menu", require("./routes/menuItemRoute"));
+app.use("/api/images", require("./routes/imageRoutes")); // Add this line with your other routes
+app.use("/uploads", express.static("uploads")); // Add this line to serve static files from the uploads directory
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
