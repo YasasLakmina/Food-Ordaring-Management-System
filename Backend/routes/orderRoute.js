@@ -5,6 +5,7 @@ const {
   updateOrderStatus,
 } = require("../controllers/orderController");
 const authenticate = require("../middlewares/authMiddleware");
+const Order = require("../models/orderModel"); // Add this import
 
 const router = express.Router();
 
