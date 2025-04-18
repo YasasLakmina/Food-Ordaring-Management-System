@@ -19,13 +19,12 @@ const LoginForm: React.FC<LoginFormProps> = ({
 }) => {
   const [formData, setFormData] = useState({
     username: "",
-    email: "",
     password: "",
-    confirmPassword: "",
-    restaurantName: "",
-    address: "",
-    phone: "",
+    isRestaurant: false, // Add toggle for restaurant/user login
   });
+
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -54,87 +53,92 @@ const LoginForm: React.FC<LoginFormProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage("");
+    setIsLoading(true);
 
-    // For signup, check if passwords match
-    if (isSignup && formData.password !== formData.confirmPassword) {
-      dispatch(loginFailure("Passwords do not match"));
-      return;
-    }
+    // Determine which endpoint to call based on user type
+    const endpoint = formData.isRestaurant ? "restaurantLogin" : "login";
 
     try {
-      dispatch(loginStart());
-
-      const endpoint = isSignup
-        ? "http://localhost:5000/api/auth/register"
-        : "http://localhost:5000/api/auth/resturentLogin";
-
-      const payload = isSignup
-        ? {
-            username: formData.username,
-            email: formData.email,
-            password: formData.password,
-            restaurantName: formData.restaurantName,
-            address: formData.address,
-            phone: formData.phone,
-          }
-        : {
+      const response = await fetch(
+        `http://localhost:5000/api/auth/${endpoint}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
             username: formData.username,
             password: formData.password,
-          };
+          }),
+        }
+      );
 
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+      console.log(`Login response status: ${response.status}`);
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(
-          data.message || (isSignup ? "Registration failed" : "Login failed")
-        );
+        console.log("Login failed:", data);
+        setErrorMessage(data.message || "Login failed");
+        setIsLoading(false);
+        return;
       }
 
-      // Login successful
+      console.log("Login successful, data:", data);
+
+      // Store token
+      localStorage.setItem("token", data.token);
+
+      // Dispatch login success with the correct user data
       dispatch(
         loginSuccess({
           token: data.token,
-          user: data.restaurant || data.user,
+          user: formData.isRestaurant ? data.restaurant : data.user,
         })
       );
-    } catch (err) {
-      let errorMessage = isSignup ? "Failed to register" : "Failed to login";
-      if (err instanceof Error) {
-        errorMessage = err.message;
+
+      // Call onSuccess callback (e.g., to close modal)
+      if (onSuccess) {
+        onSuccess();
       }
-      dispatch(loginFailure(errorMessage));
+
+      // Redirect based on user type
+      if (formData.isRestaurant) {
+        console.log("Redirecting to restaurant dashboard");
+        navigate("/restaurant/dashboard");
+      } else {
+        console.log("Redirecting to home page");
+        navigate("/");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      setErrorMessage("Network error. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5 max-w-md mx-auto">
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded text-center">
-          {error}
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {errorMessage && (
+        <div className="bg-red-50 p-3 rounded-md text-red-700 text-sm">
+          {errorMessage}
         </div>
       )}
 
-      {/* Username field */}
       <div>
         <label
           htmlFor="username"
-          className="block text-sm font-medium text-gray-700 mb-1"
+          className="block text-sm font-medium text-gray-700"
         >
           Username
         </label>
@@ -145,36 +149,14 @@ const LoginForm: React.FC<LoginFormProps> = ({
           value={formData.username}
           onChange={handleChange}
           required
-          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:border-gray-900 focus:outline-none focus:ring-gray-900 sm:text-sm"
+          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-gray-500 focus:outline-none focus:ring-gray-500 sm:text-sm"
         />
       </div>
 
-      {/* Email field - only for signup */}
-      {isSignup && (
-        <div>
-          <label
-            htmlFor="email"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Email
-          </label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:border-gray-900 focus:outline-none focus:ring-gray-900 sm:text-sm"
-          />
-        </div>
-      )}
-
-      {/* Password field */}
       <div>
         <label
           htmlFor="password"
-          className="block text-sm font-medium text-gray-700 mb-1"
+          className="block text-sm font-medium text-gray-700"
         >
           Password
         </label>
@@ -185,106 +167,34 @@ const LoginForm: React.FC<LoginFormProps> = ({
           value={formData.password}
           onChange={handleChange}
           required
-          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:border-gray-900 focus:outline-none focus:ring-gray-900 sm:text-sm"
+          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-gray-500 focus:outline-none focus:ring-gray-500 sm:text-sm"
         />
       </div>
 
-      {/* Confirm Password - only for signup */}
-      {isSignup && (
-        <div>
-          <label
-            htmlFor="confirmPassword"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Confirm Password
-          </label>
-          <input
-            type="password"
-            id="confirmPassword"
-            name="confirmPassword"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            required
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:border-gray-900 focus:outline-none focus:ring-gray-900 sm:text-sm"
-          />
-        </div>
-      )}
+      <div className="flex items-center">
+        <input
+          type="checkbox"
+          id="isRestaurant"
+          name="isRestaurant"
+          checked={formData.isRestaurant}
+          onChange={handleChange}
+          className="h-4 w-4 rounded border-gray-300 focus:ring-gray-500"
+        />
+        <label
+          htmlFor="isRestaurant"
+          className="ml-2 block text-sm text-gray-700"
+        >
+          Sign in as Restaurant
+        </label>
+      </div>
 
-      {/* Restaurant specific fields - only for signup */}
-      {isSignup && (
-        <>
-          <div>
-            <label
-              htmlFor="restaurantName"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Restaurant Name
-            </label>
-            <input
-              type="text"
-              id="restaurantName"
-              name="restaurantName"
-              value={formData.restaurantName}
-              onChange={handleChange}
-              required
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:border-gray-900 focus:outline-none focus:ring-gray-900 sm:text-sm"
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="address"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Address
-            </label>
-            <input
-              type="text"
-              id="address"
-              name="address"
-              value={formData.address}
-              onChange={handleChange}
-              required
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:border-gray-900 focus:outline-none focus:ring-gray-900 sm:text-sm"
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="phone"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Phone Number
-            </label>
-            <input
-              type="text"
-              id="phone"
-              name="phone"
-              value={formData.phone}
-              onChange={handleChange}
-              required
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:border-gray-900 focus:outline-none focus:ring-gray-900 sm:text-sm"
-            />
-          </div>
-        </>
-      )}
-
-      {/* Submit button */}
       <button
         type="submit"
-        disabled={loading}
-        className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 mt-6"
+        disabled={isLoading}
+        className="w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
       >
-        {loading
-          ? isSignup
-            ? "Creating Account..."
-            : "Signing in..."
-          : isSignup
-          ? "Create Account"
-          : "Sign in"}
+        {isLoading ? "Signing in..." : "Sign In"}
       </button>
-
-      {/* Removed the "Forgot password" link as requested */}
     </form>
   );
 };

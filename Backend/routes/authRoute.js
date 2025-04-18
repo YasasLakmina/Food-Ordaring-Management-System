@@ -1,11 +1,18 @@
 const express = require("express");
+const router = express.Router();
 const {
   registerRestaurant,
   loginRestaurant,
-} = require("../controllers/resturentController");
-const router = express.Router();
+  registerUser,
+  loginUser,
+} = require("../controllers/authController");
 
-router.post("/resturentRegister", registerRestaurant);
-router.post("/resturentLogin", loginRestaurant);
+// Restaurant auth routes
+router.post("/restaurantRegister", registerRestaurant);
+router.post("/restaurantLogin", loginRestaurant); // Make sure this endpoint exists
+
+// User auth routes
+router.post("/register", registerUser);
+router.post("/login", loginUser);
 
 module.exports = router;

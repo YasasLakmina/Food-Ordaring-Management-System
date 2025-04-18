@@ -65,7 +65,7 @@ const RestaurantSignup: React.FC = () => {
     if (validateForm()) {
       try {
         const response = await fetch(
-          "http://localhost:5000/api/auth/resturentRegister",
+          "http://localhost:5000/api/auth/restaurantRegister", // Fixed spelling here
           {
             method: "POST",
             headers: {
