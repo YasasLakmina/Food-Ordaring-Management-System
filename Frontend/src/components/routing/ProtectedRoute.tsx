@@ -3,19 +3,18 @@ import { Navigate, Outlet } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
 
-interface ProtectedRouteProps {
-  redirectPath?: string;
-}
-
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
-  redirectPath = "/login",
-}) => {
-  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+const ProtectedRoute = () => {
+  const { isAuthenticated, user } = useSelector(
+    (state: RootState) => state.auth
+  );
+  console.log("Protected route check:", { isAuthenticated, user });
 
   if (!isAuthenticated) {
-    return <Navigate to={redirectPath} replace />;
+    console.log("Not authenticated, redirecting to login");
+    return <Navigate to="/login" replace />;
   }
 
+  console.log("Authenticated, rendering protected content");
   return <Outlet />;
 };
 

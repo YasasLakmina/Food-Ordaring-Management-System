@@ -22,11 +22,25 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
         return "Authentication";
     }
   };
+
+  const handleBackClick = () => {
+    setView("login");
+  };
+
+  console.log("Current view:", view);
+  console.log("Show back button?", view !== "login");
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={getTitle()}>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={getTitle()}
+      showBackButton={view !== "login"}
+      onBackClick={handleBackClick}
+    >
       {view === "login" && (
         <div>
-          <LoginForm />
+          <LoginForm onSuccess={onClose} />
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">Don't have an account?</p>
             <div className="mt-4 space-y-3">
