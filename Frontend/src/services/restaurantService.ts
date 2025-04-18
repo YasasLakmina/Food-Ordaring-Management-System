@@ -27,24 +27,16 @@ const fetchWithAuth = async (endpoint: string, options: RequestInit = {}) => {
     // Debug information
     console.log(`API call to ${endpoint}, status: ${response.status}`);
 
-    // For debugging - log response details
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`API error response: ${errorText}`);
-
-      try {
-        const errorData = JSON.parse(errorText);
-        throw new Error(errorData.message || `Error: ${response.status}`);
-      } catch (e) {
-        throw new Error(`Error: ${response.status}`);
-      }
-    }
-
     // Handle 401 Unauthorized specifically
     if (response.status === 401) {
       // Token is invalid or expired - remove it
       removeAuthToken();
       throw new Error("Your session has expired. Please log in again.");
+    }
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `Error: ${response.status}`);
     }
 
     return response.json();
@@ -79,23 +71,10 @@ export const getMenuItems = () => {
   return fetchWithAuth("/restaurant/menu");
 };
 
-// Ensure payload format matches backend expectations
 export const addMenuItem = (data: any) => {
-  // Make sure data has all required fields in the right format
-  const payload = {
-    name: data.name,
-    description: data.description || "",
-    price: Number(data.price),
-    category: data.category,
-    image: data.image || "",
-    isAvailable: data.isAvailable !== undefined ? data.isAvailable : true,
-  };
-
-  console.log("Sending menu item data:", payload);
-
   return fetchWithAuth("/restaurant/menu", {
     method: "POST",
-    body: JSON.stringify(payload),
+    body: JSON.stringify(data),
   });
 };
 
@@ -113,8 +92,8 @@ export const deleteMenuItem = (id: string) => {
 };
 
 // Order services
-export const getRestaurantOrders = () => {
-  return fetchWithAuth("/order");
+export const getRestaurantOrders = (filter: string = "all") => {
+  return fetchWithAuth(`/order?filter=${filter}`);
 };
 
 export const updateOrderStatus = (id: string, status: string) => {
